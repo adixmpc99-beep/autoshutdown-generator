@@ -32,40 +32,57 @@ document.getElementById('pairBtn').addEventListener('click', ()=>{
       localStorage.setItem('pin_hash', hash);
       document.getElementById('status').innerText='Ter-pair. Generator siap.';
     });
+  }catch(e){document.getElementById('status').innerText='JSON pairing tidak valid: '+e}
+});
 
-    document.getElementById('scanBtn').addEventListener('click', async ()=>{
-      const status = document.getElementById('status');
-      if(!('BarcodeDetector' in window) || !navigator.mediaDevices){
-        status.innerText='Pemindaian kamera tidak didukung browser ini. Salin JSON pairing secara manual.';
-        return;
-      }
-      const video = document.getElementById('camera');
-      let stream;
+document.getElementById('scanBtn').addEventListener('click', async ()=>{
+  const status = document.getElementById('status');
+  if(!window.isSecureContext || !navigator.mediaDevices?.getUserMedia){
+    status.innerText='Kamera memerlukan HTTPS. Buka URL GitHub Pages yang diawali https://, bukan file lokal.';
+    return;
+  }
+  if(!('BarcodeDetector' in window)){
+    status.innerText='Browser ini tidak mendukung pemindaian QR bawaan. Gunakan Chrome Android terbaru atau tempel JSON pairing secara manual.';
+    return;
+  }
+
+  const video = document.getElementById('camera');
+  let stream;
+  try {
+    status.innerText='Meminta izin kamera...';
+    stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});
+    video.hidden = false;
+    video.srcObject = stream;
+    await video.play();
+    const detector = new BarcodeDetector({formats:['qr_code']});
+    status.innerText='Kamera aktif. Arahkan ke QR pairing di layar PC.';
+    const scan = async ()=>{
+      if(!video.srcObject) return;
       try {
-        stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-      } catch (error) {
-        status.innerText='Kamera tidak dapat dibuka. Periksa izin kamera atau tempel JSON pairing.';
-        return;
-      }
-      video.hidden = false;
-      video.srcObject = stream;
-      await video.play();
-      const detector = new BarcodeDetector({formats:['qr_code']});
-      status.innerText='Arahkan kamera ke QR pairing.';
-      const scan = async ()=>{
         const codes = await detector.detect(video);
         if(codes.length){
           document.getElementById('pairing').value = codes[0].rawValue;
           stream.getTracks().forEach(track=>track.stop());
+          video.srcObject = null;
           video.hidden = true;
-          status.innerText='QR terbaca. Masukkan PIN lalu tekan Pair.';
+          status.innerText='QR terbaca. Masukkan PIN lalu tekan Pair dan Simpan.';
           return;
         }
         requestAnimationFrame(scan);
-      };
-      scan();
-    });
-  }catch(e){document.getElementById('status').innerText='JSON pairing tidak valid: '+e}
+      } catch (error) {
+        stream.getTracks().forEach(track=>track.stop());
+        video.srcObject = null;
+        video.hidden = true;
+        status.innerText='Gagal membaca QR. Coba tambah pencahayaan atau tempel JSON pairing secara manual.';
+      }
+    };
+    scan();
+  } catch (error) {
+    if(stream) stream.getTracks().forEach(track=>track.stop());
+    video.srcObject = null;
+    video.hidden = true;
+    status.innerText='Tidak dapat membuka kamera. Izinkan akses kamera untuk situs ini, lalu coba lagi; atau tempel JSON pairing.';
+  }
 });
 
 document.getElementById('genBtn').addEventListener('click', async ()=>{
