@@ -1,0 +1,9 @@
+{
+  "name": "AutoShutdown - Generator",
+  "short_name": "AutoShutdown",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "description": "Generator kode sekali pakai untuk AutoShutdown (offline PWA)",
+  "icons": []
+}

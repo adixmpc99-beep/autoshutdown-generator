@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AutoShutdown - Code Generator (PWA)</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    body{font-family:Segoe UI,Arial;padding:16px}
+    .box{max-width:720px;margin:auto}
+    label{display:block;margin-top:8px}
+    input,button,textarea{font-size:16px;padding:8px;width:100%}
+    .codes{margin-top:12px;font-family:monospace}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>AutoShutdown - PWA Generator</h1>
+    <p>Scan QR pairing dari PC (atau tempel JSON pairing) lalu masukkan PIN 4 digit untuk mengamankan generator.</p>
+    <label>Pairing (QR JSON dari PC):</label>
+    <textarea id="pairing" rows="4"></textarea>
+    <button id="scanBtn" type="button">Scan QR dengan kamera</button>
+    <label>PIN 4 digit:</label>
+    <input id="pin" type="password" maxlength="4" />
+    <button id="pairBtn">Pair dan Simpan</button>
+    <div id="status"></div>
+    <hr />
+    <button id="genBtn">Buat 7 Kode (sekali pakai)</button>
+    <div class="codes" id="codes"></div>
+    <video id="camera" playsinline hidden></video>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
